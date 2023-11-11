@@ -81,17 +81,37 @@ class BillplzController extends Controller
         return response()->json($response->json());
     }
 
-    public function saveToHistory(Request $request, $data)
+    public function saveToHistory(Request $request)
     {
-        History::create([
-            'status' => $data['state'] === 'paid' ? 'Sudah dibayar' : 'Belum dibayar',
-            'amount' => $data['amount'],
-            'paid_amount' => $data['paid_amount'],
-            'due_at' => $data['due_at'],
-            'email' => $data['email'],
-            'mobile' => $data['mobile'] ?? 0,
-            'name' => $data['name'],
-            'url' => $data['url'],
-        ]);
+        $data = json_decode($request->getContent(), true);
+
+        $existingRecord = History::where('kode_billing', $data['kode_billing'])->first();
+
+        if ($existingRecord) {
+            $existingRecord->update([
+                'status' => $data['state'] === 'paid' ? 'Sudah dibayar' : 'Belum dibayar',
+                'amount' => $data['amount'],
+                'paid_amount' => $data['paid_amount'],
+                'due_at' => $data['due_at'],
+                'email' => $data['email'],
+                'mobile' => $data['mobile'] ?? 0,
+                'name' => $data['name'],
+                'url' => $data['url'],
+            ]);
+        } else {
+            History::create([
+                'kode_billing' => $data['kode_billing'],
+                'status' => $data['state'] === 'paid' ? 'Sudah dibayar' : 'Belum dibayar',
+                'amount' => $data['amount'],
+                'paid_amount' => $data['paid_amount'],
+                'due_at' => $data['due_at'],
+                'email' => $data['email'],
+                'mobile' => $data['mobile'] ?? 0,
+                'name' => $data['name'],
+                'url' => $data['url'],
+            ]);
+        }
+
+        return response()->json(['message' => 'You Caught Me :(']);
     }
 }

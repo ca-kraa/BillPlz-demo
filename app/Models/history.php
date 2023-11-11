@@ -10,5 +10,5 @@ class history extends Model
     use HasFactory;
 
     protected $table = 'histories';
-    protected $fillable = ['status', 'amount', 'paid_amount', 'due_at', 'email', 'mobile', 'name', 'url'];
+    protected $fillable = ['kode_billing', 'status', 'amount', 'paid_amount', 'due_at', 'email', 'mobile', 'name', 'url'];
 }
