@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\history;
+use App\Models\payment;
 
 class BillplzController extends Controller
 {
@@ -53,9 +54,13 @@ class BillplzController extends Controller
                 'callback_url' => $callbackUrl
             ]);
 
-        $bill = $response->json();
+        $billData = $response->json();
+        $billData['id_pembayaran'] = $billData['id'];
+        unset($billData['id']);
 
-        return response()->json($bill);
+        payment::create($billData);
+
+        return response()->json($billData);
     }
 
     public function getPayment(Request $request)
