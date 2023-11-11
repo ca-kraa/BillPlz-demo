@@ -81,6 +81,16 @@ class BillplzController extends Controller
         return response()->json($response->json());
     }
 
+    public function deleteBill($BILL_ID)
+    {
+        $apiKey = env('BILLPLZ_API_KEY');
+
+        $response = Http::withBasicAuth($apiKey, '')
+            ->delete("https://www.billplz-sandbox.com/api/v3/bills/{$BILL_ID}/transactions");
+
+        return response()->json($response->json());
+    }
+
     public function saveToHistory(Request $request)
     {
         $data = json_decode($request->getContent(), true);
