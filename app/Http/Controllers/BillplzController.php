@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use App\Models\history;
 
 class BillplzController extends Controller
 {
@@ -78,5 +79,19 @@ class BillplzController extends Controller
             ->get("https://www.billplz-sandbox.com/api/v3/bills/{$BILL_ID}/transactions");
 
         return response()->json($response->json());
+    }
+
+    public function saveToHistory(Request $request, $data)
+    {
+        History::create([
+            'status' => $data['state'] === 'paid' ? 'Sudah dibayar' : 'Belum dibayar',
+            'amount' => $data['amount'],
+            'paid_amount' => $data['paid_amount'],
+            'due_at' => $data['due_at'],
+            'email' => $data['email'],
+            'mobile' => $data['mobile'] ?? 0,
+            'name' => $data['name'],
+            'url' => $data['url'],
+        ]);
     }
 }

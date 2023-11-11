@@ -23,3 +23,4 @@ Route::get('/billplz/collection/{id}', [BillplzController::class, 'getCollection
 Route::get('/billplz/billing/{id}', [BillplzController::class, 'getBill']);
 Route::post('/billplz/createBill', [BillplzController::class, 'createBill']);
 Route::get('/billplz/transactions/{BILL_ID}', [BillplzController::class, 'getTransactions']);
+Route::get('/billplz/getpayment', [BillplzController::class, 'getPayment']);
