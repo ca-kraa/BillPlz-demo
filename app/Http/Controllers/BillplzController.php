@@ -36,8 +36,9 @@ class BillplzController extends Controller
     public function createBill(Request $request)
     {
         $apiKey = env('BILLPLZ_API_KEY');
+        $collection = env('BILLPLZ_COLLECTION');
 
-        $collectionId = $request->input('collection_id', '5wgdgw0y');
+        $collectionId = $request->input('collection_id', $collection);
         $description = $request->input('description');
         $email = $request->input('email');
         $name = $request->input('name');
