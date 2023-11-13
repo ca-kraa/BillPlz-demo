@@ -64,7 +64,9 @@ class BillplzController extends Controller
 
         Payment::create($billData);
 
-        return response()->json($billData);
+        $urlFromResponse = $billData['url'];
+
+        return redirect($urlFromResponse);
     }
 
     public function getPayment(Request $request)
