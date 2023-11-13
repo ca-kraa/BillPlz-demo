@@ -37,12 +37,12 @@ class BillplzController extends Controller
     {
         $apiKey = env('BILLPLZ_API_KEY');
 
-        $collectionId = $request->input('collection_id');
+        $collectionId = $request->input('collection_id', '5wgdgw0y');
         $description = $request->input('description');
         $email = $request->input('email');
         $name = $request->input('name');
         $amount = $request->input('amount');
-        $callbackUrl = $request->input('callback_url');
+        $callbackUrl = $request->input('callback_url', '0');
 
         $response = Http::withBasicAuth($apiKey, '')
             ->post('https://www.billplz-sandbox.com/api/v3/bills', [
@@ -55,10 +55,13 @@ class BillplzController extends Controller
             ]);
 
         $billData = $response->json();
+
+        $callbackUrl = $billData['url'];
+
         $billData['id_pembayaran'] = $billData['id'];
         unset($billData['id']);
 
-        payment::create($billData);
+        Payment::create($billData);
 
         return response()->json($billData);
     }
@@ -128,5 +131,10 @@ class BillplzController extends Controller
         }
 
         return response()->json(['message' => 'You Caught Me :(']);
+    }
+
+    public function createForm()
+    {
+        return view('payment.create-bill');
     }
 }
