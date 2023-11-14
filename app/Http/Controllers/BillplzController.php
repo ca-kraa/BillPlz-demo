@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\history;
 use App\Models\payment;
+use App\Models\Barang;
 
 class BillplzController extends Controller
 {
@@ -139,5 +140,28 @@ class BillplzController extends Controller
     public function createForm()
     {
         return view('payment.create-bill');
+    }
+
+    public function createBarang(Request $request)
+    {
+        $validatedData = $request->validate([
+            'nama_barang' => 'required|string',
+            'deskripsi_barang' => 'required|string',
+            'harga_barang' => 'required|numeric',
+        ]);
+
+        $barang = Barang::create($validatedData);
+
+        return response()->json([
+            'message' => 'Data Barang berhasil dibuat',
+            'data' => $barang,
+        ], 201);
+    }
+
+    public function showBarang(Request $request)
+    {
+        $barang = Barang::all();
+
+        return response()->json(['data' => $barang]);
     }
 }

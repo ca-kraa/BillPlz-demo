@@ -24,3 +24,7 @@ Route::get('/dashboard', function () {
 
 Route::get('/payment/create', [BillplzController::class, 'createForm'])->name('payment.createForm');
 Route::post('/payment/create', [BillplzController::class, 'createBill'])->name('payment.create');
+
+Route::get('/product', function () {
+    return view('produk.index');
+});

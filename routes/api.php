@@ -26,3 +26,7 @@ Route::get('/billplz/transactions/{BILL_ID}', [BillplzController::class, 'getTra
 Route::get('/billplz/getpayment', [BillplzController::class, 'getPayment']);
 
 Route::post('/history/save', [BillplzController::class, 'saveToHistory']);
+
+// Produk
+Route::post('/create-produk', [BillplzController::class, 'createBarang']);
+Route::get('/show-produk', [BillplzController::class, 'showBarang']);
