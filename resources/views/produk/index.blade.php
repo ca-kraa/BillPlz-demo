@@ -27,44 +27,6 @@
         </table>
     </div>
 
-    <script>
-        $(document).ready(function() {
-            $.ajax({
-                url: '/api/show-produk',
-                method: 'GET',
-                success: function(response) {
-                    var barangTableBody = $('#barangTableBody');
-                    if (response.data.length > 0) {
-                        response.data.forEach(function(barang) {
-                            var row = '<tr>' +
-                                '<td class="py-2 px-4 border-b text-center">' + barang
-                                .nama_barang +
-                                '</td>' +
-                                '<td class="py-2 px-4 border-b text-center">' + barang
-                                .deskripsi_barang +
-                                '</td>' +
-                                '<td class="py-2 px-4 border-b text-center">' + barang
-                                .harga_barang +
-                                '</td>' +
-                                '</tr>';
-                            barangTableBody.append(row);
-                        });
-                    } else {
-                        var noDataMessage = '<tr>' +
-                            '<td colspan="3" class="py-2 px-4 border-b text-center">' +
-                            '<i class="fa-regular fa-face-sad-cry"></i> Sila tambahkan produk terlebih dahulu.' +
-                            '</td>' +
-                            '</tr>';
-                        barangTableBody.append(noDataMessage);
-                    }
-                },
-                error: function(error) {
-                    console.error('Failed to fetch data:', error);
-                }
-            });
-        });
-    </script>
-
     <div id="tambahdata-modal" tabindex="-1" aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-4 w-full max-w-md max-h-full">
@@ -119,31 +81,75 @@
 
     <script>
         $(document).ready(function() {
-            $('#createBarangButton').click(function() {
-                var nama_barang = $('#nama_barang').val();
-                var deskripsi_barang = $('#deskripsi_barang').val();
-                var harga_barang = $('#harga_barang').val();
-
+            function fetchAndDisplayData() {
                 $.ajax({
-                    url: '/api/create-produk',
-                    method: 'POST',
-                    data: {
-                        nama_barang: nama_barang,
-                        deskripsi_barang: deskripsi_barang,
-                        harga_barang: harga_barang,
-                        _token: '{{ csrf_token() }}'
-                    },
+                    url: '/api/show-produk',
+                    method: 'GET',
                     success: function(response) {
-                        console.log('Barang berhasil ditambahkan:', response);
+                        var barangTableBody = $('#barangTableBody');
+                        barangTableBody.empty();
+
+                        if (response.data.length > 0) {
+                            response.data.forEach(function(barang) {
+                                var row = '<tr>' +
+                                    '<td class="py-2 px-4 border-b text-center">' + barang
+                                    .nama_barang +
+                                    '</td>' +
+                                    '<td class="py-2 px-4 border-b text-center">' + barang
+                                    .deskripsi_barang +
+                                    '</td>' +
+                                    '<td class="py-2 px-4 border-b text-center">' + barang
+                                    .harga_barang +
+                                    '</td>' +
+                                    '</tr>';
+                                barangTableBody.append(row);
+                            });
+                        } else {
+                            var noDataMessage = '<tr>' +
+                                '<td colspan="3" class="py-2 px-4 border-b text-center">' +
+                                '<i class="fa-regular fa-face-sad-cry"></i> Sila tambahkan produk terlebih dahulu.' +
+                                '</td>' +
+                                '</tr>';
+                            barangTableBody.append(noDataMessage);
+                        }
                     },
                     error: function(error) {
-                        console.error('Gagal menambahkan barang:', error);
+                        console.error('Failed to fetch data:', error);
                     }
                 });
+            }
+
+            $(document).ready(function() {
+                $('#createBarangButton').click(function() {
+                    var nama_barang = $('#nama_barang').val();
+                    var deskripsi_barang = $('#deskripsi_barang').val();
+                    var harga_barang = $('#harga_barang').val();
+
+                    $.ajax({
+                        url: '/api/create-produk',
+                        method: 'POST',
+                        data: {
+                            nama_barang: nama_barang,
+                            deskripsi_barang: deskripsi_barang,
+                            harga_barang: harga_barang,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            alert('Data berhasil disimpan!');
+                            fetchAndDisplayData
+                        (); 
+                        },
+
+                        error: function(error) {
+                            console.error('Gagal menambahkan barang:', error);
+                        }
+                    });
+                });
             });
+
+
+            fetchAndDisplayData();
         });
     </script>
-
-
 
 @endsection
