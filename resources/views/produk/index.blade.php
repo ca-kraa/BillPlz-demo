@@ -17,6 +17,7 @@
         <table class="min-w-full bg-white border border-gray-300">
             <thead>
                 <tr>
+                    <th class="py-2 px-4 border-b text-center">#</th>
                     <th class="py-2 px-4 border-b text-center">Nama Barang</th>
                     <th class="py-2 px-4 border-b text-center">Deskripsi Barang</th>
                     <th class="py-2 px-4 border-b text-center">Harga Barang</th>
@@ -78,7 +79,6 @@
             </div>
         </div>
     </div>
-
     <script>
         $(document).ready(function() {
             function fetchAndDisplayData() {
@@ -86,27 +86,44 @@
                     url: '/api/show-produk',
                     method: 'GET',
                     success: function(response) {
+                        var counter = 1;
                         var barangTableBody = $('#barangTableBody');
                         barangTableBody.empty();
 
                         if (response.data.length > 0) {
                             response.data.forEach(function(barang) {
                                 var row = '<tr>' +
-                                    '<td class="py-2 px-4 border-b text-center">' + barang
-                                    .nama_barang +
+                                    '<td class="py-2 px-4 border-b text-center">' + counter +
                                     '</td>' +
                                     '<td class="py-2 px-4 border-b text-center">' + barang
-                                    .deskripsi_barang +
-                                    '</td>' +
+                                    .nama_barang + '</td>' +
                                     '<td class="py-2 px-4 border-b text-center">' + barang
-                                    .harga_barang +
+                                    .deskripsi_barang + '</td>' +
+                                    '<td class="py-2 px-4 border-b text-center">' + barang
+                                    .harga_barang + '</td>' +
+                                    '<td class="py-2 px-4 border-b text-center">' +
+                                    '<button class="btn-bayar" data-nama="' + barang
+                                    .nama_barang + '" data-deskripsi="' + barang
+                                    .deskripsi_barang + '" data-harga="' + barang
+                                    .harga_barang + '">Bayar</button>' +
                                     '</td>' +
                                     '</tr>';
+
                                 barangTableBody.append(row);
+
+                                counter++;
+                            });
+
+                            $('.btn-bayar').click(function() {
+                                var nama_barang = $(this).data('nama');
+                                var deskripsi_barang = $(this).data('deskripsi');
+                                var harga_barang = $(this).data('harga');
+
+                                createBill(nama_barang, deskripsi_barang, harga_barang);
                             });
                         } else {
                             var noDataMessage = '<tr>' +
-                                '<td colspan="3" class="py-2 px-4 border-b text-center">' +
+                                '<td colspan="5" class="py-2 px-4 border-b text-center">' +
                                 '<i class="fa-regular fa-face-sad-cry"></i> Sila tambahkan produk terlebih dahulu.' +
                                 '</td>' +
                                 '</tr>';
@@ -118,6 +135,43 @@
                     }
                 });
             }
+
+            function createBill(nama_barang, deskripsi_barang, harga_barang) {
+                $.ajax({
+                    url: '/api/createBill-produk',
+                    method: 'POST',
+                    data: {
+                        name: nama_barang,
+                        description: deskripsi_barang,
+                        amount: harga_barang,
+                    },
+                    success: function(billResponse) {
+                        console.log('Bill created successfully:', billResponse);
+
+                        // Mendapatkan URL dari respons JSON
+                        var paymentUrl = billResponse.url;
+
+                        // Membuka jendela baru atau tab dengan URL pembayaran
+                        openPaymentWindow(paymentUrl);
+                    },
+                    error: function(billError) {
+                        console.error('Failed to create bill:', billError);
+                        // Handle error jika diperlukan
+                    }
+                });
+            }
+
+            function openPaymentWindow(paymentUrl) {
+                // Buka jendela baru atau tab dengan URL pembayaran
+                var paymentWindow = window.open(paymentUrl, '_blank', 'width=400,height=400');
+
+                // Optional: Atur properti lainnya untuk jendela atau tab, seperti posisi dan tata letak
+                // paymentWindow.moveTo(x, y);
+                // paymentWindow.resizeTo(width, height);
+            }
+
+
+            fetchAndDisplayData();
 
             $(document).ready(function() {
                 $('#createBarangButton').click(function() {
@@ -136,20 +190,16 @@
                         },
                         success: function(response) {
                             alert('Data berhasil disimpan!');
-                            fetchAndDisplayData
-                        (); 
+                            fetchAndDisplayData();
                         },
-
                         error: function(error) {
                             console.error('Gagal menambahkan barang:', error);
                         }
                     });
                 });
             });
-
-
-            fetchAndDisplayData();
         });
     </script>
+
 
 @endsection

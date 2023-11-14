@@ -41,7 +41,7 @@ class BillplzController extends Controller
 
         $collectionId = $request->input('collection_id', $collection);
         $description = $request->input('description');
-        $email = $request->input('email');
+        $email = $request->input('email', 'tes@tes.com');
         $name = $request->input('name');
         $amount = $request->input('amount');
         $callbackUrl = $request->input('callback_url', '0');
@@ -163,5 +163,51 @@ class BillplzController extends Controller
         $barang = Barang::all();
 
         return response()->json(['data' => $barang]);
+    }
+
+    public function createBillProduct(Request $request)
+    {
+        $apiKey = env('BILLPLZ_API_KEY');
+        $collection = env('BILLPLZ_COLLECTION');
+
+        $collectionId = $request->input('collection_id', $collection);
+        $description = $request->input('description');
+        $email = $request->input('email', 'tes@tes.com');
+        $name = $request->input('name');
+        $amount = $request->input('amount');
+        $callbackUrl = $request->input('callback_url', '0');
+
+        $produk = Barang::where('nama_barang', $name)->first();
+
+        if ($produk) {
+            $description = $produk->deskripsi_barang;
+
+            $response = Http::withBasicAuth($apiKey, '')
+                ->post('https://www.billplz-sandbox.com/api/v3/bills', [
+                    'collection_id' => $collectionId,
+                    'description' => $description,
+                    'email' => $email,
+                    'name' => $name,
+                    'amount' => $amount,
+                    'callback_url' => $callbackUrl
+                ]);
+
+            $billData = $response->json();
+
+            $callbackUrl = $billData['url'];
+
+            $billData['id_pembayaran'] = $billData['id'];
+            unset($billData['id']);
+
+            Payment::create($billData);
+
+            $urlFromResponse = $billData['url'];
+
+            // Ubah ini menjadi respons JSON
+            return response()->json(['url' => $urlFromResponse]);
+        } else {
+            // Ubah ini menjadi respons JSON
+            return response()->json(['error' => 'Produk tidak ditemukan'], 404);
+        }
     }
 }
