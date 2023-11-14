@@ -11,6 +11,59 @@
         </button>
     </div>
 
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-md shadow-md">
+        <h1 class="text-2xl font-bold mb-6">List Barang</h1>
+
+        <table class="min-w-full bg-white border border-gray-300">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border-b text-center">Nama Barang</th>
+                    <th class="py-2 px-4 border-b text-center">Deskripsi Barang</th>
+                    <th class="py-2 px-4 border-b text-center">Harga Barang</th>
+                </tr>
+            </thead>
+            <tbody id="barangTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: '/api/show-produk',
+                method: 'GET',
+                success: function(response) {
+                    var barangTableBody = $('#barangTableBody');
+                    if (response.data.length > 0) {
+                        response.data.forEach(function(barang) {
+                            var row = '<tr>' +
+                                '<td class="py-2 px-4 border-b text-center">' + barang
+                                .nama_barang +
+                                '</td>' +
+                                '<td class="py-2 px-4 border-b text-center">' + barang
+                                .deskripsi_barang +
+                                '</td>' +
+                                '<td class="py-2 px-4 border-b text-center">' + barang
+                                .harga_barang +
+                                '</td>' +
+                                '</tr>';
+                            barangTableBody.append(row);
+                        });
+                    } else {
+                        var noDataMessage = '<tr>' +
+                            '<td colspan="3" class="py-2 px-4 border-b text-center">' +
+                            '<i class="fa-regular fa-face-sad-cry"></i> Sila tambahkan produk terlebih dahulu.' +
+                            '</td>' +
+                            '</tr>';
+                        barangTableBody.append(noDataMessage);
+                    }
+                },
+                error: function(error) {
+                    console.error('Failed to fetch data:', error);
+                }
+            });
+        });
+    </script>
 
     <div id="tambahdata-modal" tabindex="-1" aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
