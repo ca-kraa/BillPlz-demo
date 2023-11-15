@@ -84,10 +84,20 @@
             </div>
         </div>
     </div>
+
+    <div id="loadingPembayaran" class="hidden fixed inset-0 z-10 items-center justify-center bg-white bg-opacity-70">
+        <div class="p-5 rounded-lg bg-white shadow-lg flex flex-col items-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-r-4 my-4"></div>
+            <p class="text-gray-700">Bayaran anda sedang berjalan</p>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function() {
+            $('#loadingMessage').text('Loading...');
+            $('#loadingPembayaran').hide();
+
             function fetchAndDisplayData() {
-                $('#loadingMessage').text('Loading...');
                 $.ajax({
                     url: '/api/show-produk',
                     method: 'GET',
@@ -120,10 +130,10 @@
                                 counter++;
                             });
 
-                            // Sembunyikan pesan loading
                             $('#loadingMessage').text('');
 
                             $('.btn-bayar').click(function() {
+                                $('#loadingPembayaran').show();
                                 var nama_barang = $(this).data('nama');
                                 var deskripsi_barang = $(this).data('deskripsi');
                                 var harga_barang = $(this).data('harga');
@@ -138,13 +148,11 @@
                                 '</tr>';
                             barangTableBody.append(noDataMessage);
 
-                            // Sembunyikan pesan loading
                             $('#loadingMessage').text('');
                         }
                     },
                     error: function(error) {
                         console.error('Failed to fetch data:', error);
-                        // Sembunyikan pesan loading
                         $('#loadingMessage').text('');
                     }
                 });
@@ -161,7 +169,6 @@
                     },
                     success: function(billResponse) {
                         console.log('Bill created successfully:', billResponse);
-
                         var paymentUrl = billResponse.url;
 
                         openPaymentWindow(paymentUrl);
@@ -174,38 +181,40 @@
 
             function openPaymentWindow(paymentUrl) {
                 var paymentWindow = window.open(paymentUrl, '_blank', 'width=400,height=557');
+
+                if (paymentWindow) {
+                    paymentWindow.addEventListener('load', function() {
+                        $('#loadingPembayaran').hide();
+                    });
+                }
             }
 
+            $('#createBarangButton').click(function() {
+                var nama_barang = $('#nama_barang').val();
+                var deskripsi_barang = $('#deskripsi_barang').val();
+                var harga_barang = $('#harga_barang').val();
 
-            fetchAndDisplayData();
-
-            $(document).ready(function() {
-                $('#createBarangButton').click(function() {
-                    var nama_barang = $('#nama_barang').val();
-                    var deskripsi_barang = $('#deskripsi_barang').val();
-                    var harga_barang = $('#harga_barang').val();
-
-                    $.ajax({
-                        url: '/api/create-produk',
-                        method: 'POST',
-                        data: {
-                            nama_barang: nama_barang,
-                            deskripsi_barang: deskripsi_barang,
-                            harga_barang: harga_barang,
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            alert('Data berhasil disimpan!');
-                            fetchAndDisplayData();
-                        },
-                        error: function(error) {
-                            console.error('Gagal menambahkan barang:', error);
-                        }
-                    });
+                $.ajax({
+                    url: '/api/create-produk',
+                    method: 'POST',
+                    data: {
+                        nama_barang: nama_barang,
+                        deskripsi_barang: deskripsi_barang,
+                        harga_barang: harga_barang,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alert('Data berhasil disimpan!');
+                        fetchAndDisplayData();
+                    },
+                    error: function(error) {
+                        console.error('Gagal menambahkan barang:', error);
+                    }
                 });
             });
+
+            fetchAndDisplayData();
         });
     </script>
-
 
 @endsection
