@@ -94,68 +94,68 @@
 
     <script>
         $(document).ready(function() {
-            $('#loadingMessage').text('Loading...');
-            $('#loadingPembayaran').hide();
+            let loadingMessage = $('#loadingMessage');
+            let loadingPembayaran = $('#loadingPembayaran');
+
+            loadingMessage.text('Loading...');
+            loadingPembayaran.hide();
 
             function fetchAndDisplayData() {
                 $.ajax({
                     url: '/api/show-produk',
                     method: 'GET',
                     success: function(response) {
-                        var counter = 1;
-                        var barangTableBody = $('#barangTableBody');
-                        barangTableBody.empty();
-
-                        if (response.data.length > 0) {
-                            response.data.forEach(function(barang) {
-                                var row = '<tr>' +
-                                    '<td class="py-2 px-4 border-b text-center">' + counter +
-                                    '</td>' +
-                                    '<td class="py-2 px-4 border-b text-center">' + barang
-                                    .nama_barang + '</td>' +
-                                    '<td class="py-2 px-4 border-b text-center">' + barang
-                                    .deskripsi_barang + '</td>' +
-                                    '<td class="py-2 px-4 border-b text-center">' + barang
-                                    .harga_barang + '</td>' +
-                                    '<td class="py-2 px-4 border-b text-center">' +
-                                    '<button class="btn-bayar" data-nama="' + barang
-                                    .nama_barang + '" data-deskripsi="' + barang
-                                    .deskripsi_barang + '" data-harga="' + barang
-                                    .harga_barang + '">Bayar</button>' +
-                                    '</td>' +
-                                    '</tr>';
-
-                                barangTableBody.append(row);
-
-                                counter++;
-                            });
-
-                            $('#loadingMessage').text('');
-
-                            $('.btn-bayar').click(function() {
-                                $('#loadingPembayaran').show();
-                                var nama_barang = $(this).data('nama');
-                                var deskripsi_barang = $(this).data('deskripsi');
-                                var harga_barang = $(this).data('harga');
-
-                                createBill(nama_barang, deskripsi_barang, harga_barang);
-                            });
-                        } else {
-                            var noDataMessage = '<tr>' +
-                                '<td colspan="5" class="py-2 px-4 border-b text-center">' +
-                                '<i class="fa-regular fa-face-sad-cry"></i> Sila tambahkan produk terlebih dahulu.' +
-                                '</td>' +
-                                '</tr>';
-                            barangTableBody.append(noDataMessage);
-
-                            $('#loadingMessage').text('');
-                        }
+                        handleProductData(response.data);
                     },
                     error: function(error) {
                         console.error('Failed to fetch data:', error);
-                        $('#loadingMessage').text('');
+                        loadingMessage.text('');
                     }
                 });
+            }
+
+            function handleProductData(data) {
+                var counter = 1;
+                var barangTableBody = $('#barangTableBody');
+                barangTableBody.empty();
+
+                if (data.length > 0) {
+                    data.forEach(function(barang) {
+                        var row = `<tr>
+                    <td class="py-2 px-4 border-b text-center">${counter}</td>
+                    <td class="py-2 px-4 border-b text-center">${barang.nama_barang}</td>
+                    <td class="py-2 px-4 border-b text-center">${barang.deskripsi_barang}</td>
+                    <td class="py-2 px-4 border-b text-center">${barang.harga_barang}</td>
+                    <td class="py-2 px-4 border-b text-center">
+                        <button class="btn-bayar" data-nama="${barang.nama_barang}" data-deskripsi="${barang.deskripsi_barang}" data-harga="${barang.harga_barang}">Bayar</button>
+                    </td>
+                </tr>`;
+
+                        barangTableBody.append(row);
+
+                        counter++;
+                    });
+
+                    loadingMessage.text('');
+
+                    $('.btn-bayar').click(function() {
+                        loadingPembayaran.show();
+                        var nama_barang = $(this).data('nama');
+                        var deskripsi_barang = $(this).data('deskripsi');
+                        var harga_barang = $(this).data('harga');
+
+                        createBill(nama_barang, deskripsi_barang, harga_barang);
+                    });
+                } else {
+                    var noDataMessage = `<tr>
+                <td colspan="5" class="py-2 px-4 border-b text-center">
+                    <i class="fa-regular fa-face-sad-cry"></i> Sila tambahkan produk terlebih dahulu.
+                </td>
+            </tr>`;
+                    barangTableBody.append(noDataMessage);
+
+                    loadingMessage.text('');
+                }
             }
 
             function createBill(nama_barang, deskripsi_barang, harga_barang) {
@@ -169,24 +169,20 @@
                     },
                     success: function(billResponse) {
                         console.log('Bill created successfully:', billResponse);
+                        loadingPembayaran.hide();
                         var paymentUrl = billResponse.url;
 
                         openPaymentWindow(paymentUrl);
                     },
                     error: function(billError) {
                         console.error('Failed to create bill:', billError);
+                        loadingPembayaran.hide();
                     }
                 });
             }
 
             function openPaymentWindow(paymentUrl) {
                 var paymentWindow = window.open(paymentUrl, '_blank', 'width=400,height=557');
-
-                if (paymentWindow) {
-                    paymentWindow.addEventListener('load', function() {
-                        $('#loadingPembayaran').hide();
-                    });
-                }
             }
 
             $('#createBarangButton').click(function() {
@@ -211,6 +207,14 @@
                         console.error('Gagal menambahkan barang:', error);
                     }
                 });
+            });
+
+            var timer = setInterval(function() {
+                location.reload();
+            }, 10000);
+
+            $('.btn-bayar').click(function() {
+                clearInterval(timer);
             });
 
             fetchAndDisplayData();
