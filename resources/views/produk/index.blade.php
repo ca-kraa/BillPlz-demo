@@ -18,14 +18,19 @@
             <thead>
                 <tr>
                     <th class="py-2 px-4 border-b text-center">#</th>
-                    <th class="py-2 px-4 border-b text-center">Nama Barang</th>
-                    <th class="py-2 px-4 border-b text-center">Deskripsi Barang</th>
-                    <th class="py-2 px-4 border-b text-center">Harga Barang</th>
+                    <th class="py-2 px-4 border-b text-center">Nama Item</th>
+                    <th class="py-2 px-4 border-b text-center">Penerangan Item</th>
+                    <th class="py-2 px-4 border-b text-center">Harga Item</th>
+                    <th class="py-2 px-4 border-b text-center">Tindakan</th>
                 </tr>
             </thead>
             <tbody id="barangTableBody">
+                <tr>
+                    <td id="loadingMessage" colspan="5" class="text-center">Loading...</td>
+                </tr>
             </tbody>
         </table>
+
     </div>
 
     <div id="tambahdata-modal" tabindex="-1" aria-hidden="true"
@@ -82,6 +87,7 @@
     <script>
         $(document).ready(function() {
             function fetchAndDisplayData() {
+                $('#loadingMessage').text('Loading...');
                 $.ajax({
                     url: '/api/show-produk',
                     method: 'GET',
@@ -114,6 +120,9 @@
                                 counter++;
                             });
 
+                            // Sembunyikan pesan loading
+                            $('#loadingMessage').text('');
+
                             $('.btn-bayar').click(function() {
                                 var nama_barang = $(this).data('nama');
                                 var deskripsi_barang = $(this).data('deskripsi');
@@ -128,10 +137,15 @@
                                 '</td>' +
                                 '</tr>';
                             barangTableBody.append(noDataMessage);
+
+                            // Sembunyikan pesan loading
+                            $('#loadingMessage').text('');
                         }
                     },
                     error: function(error) {
                         console.error('Failed to fetch data:', error);
+                        // Sembunyikan pesan loading
+                        $('#loadingMessage').text('');
                     }
                 });
             }
@@ -148,26 +162,18 @@
                     success: function(billResponse) {
                         console.log('Bill created successfully:', billResponse);
 
-                        // Mendapatkan URL dari respons JSON
                         var paymentUrl = billResponse.url;
 
-                        // Membuka jendela baru atau tab dengan URL pembayaran
                         openPaymentWindow(paymentUrl);
                     },
                     error: function(billError) {
                         console.error('Failed to create bill:', billError);
-                        // Handle error jika diperlukan
                     }
                 });
             }
 
             function openPaymentWindow(paymentUrl) {
-                // Buka jendela baru atau tab dengan URL pembayaran
-                var paymentWindow = window.open(paymentUrl, '_blank', 'width=400,height=400');
-
-                // Optional: Atur properti lainnya untuk jendela atau tab, seperti posisi dan tata letak
-                // paymentWindow.moveTo(x, y);
-                // paymentWindow.resizeTo(width, height);
+                var paymentWindow = window.open(paymentUrl, '_blank', 'width=400,height=557');
             }
 
 
