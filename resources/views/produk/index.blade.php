@@ -209,14 +209,6 @@
                 });
             });
 
-            var timer = setInterval(function() {
-                location.reload();
-            }, 10000);
-
-            $('.btn-bayar').click(function() {
-                clearInterval(timer);
-            });
-
             fetchAndDisplayData();
         });
     </script>
