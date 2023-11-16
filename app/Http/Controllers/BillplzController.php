@@ -203,10 +203,8 @@ class BillplzController extends Controller
 
             $urlFromResponse = $billData['url'];
 
-            // Ubah ini menjadi respons JSON
             return response()->json(['url' => $urlFromResponse]);
         } else {
-            // Ubah ini menjadi respons JSON
             return response()->json(['error' => 'Produk tidak ditemukan'], 404);
         }
     }
