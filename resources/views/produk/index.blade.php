@@ -56,26 +56,32 @@
                     <form id="createBarangForm" class="space-y-4">
                         <div>
                             <label for="nama_barang"
-                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama Barang</label>
+                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama Item</label>
                             <input type="text" name="nama_barang" id="nama_barang"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                                 required>
                         </div>
                         <div>
                             <label for="deskripsi_barang"
-                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Deskripsi
-                                Barang</label>
+                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Penerangan Item</label>
                             <textarea name="deskripsi_barang" id="deskripsi_barang"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                                 required></textarea>
                         </div>
                         <div>
                             <label for="harga_barang"
-                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Barang</label>
-                            <input type="number" name="harga_barang" id="harga_barang"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                required>
+                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Item</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-gray-900 dark:text-white">
+                                    RM
+                                </span>
+                                <input type="number" name="harga_barang" id="harga_barang" step="0.01"
+                                    class="pl-8 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                    required>
+                            </div>
                         </div>
+
                         <button type="button" id="createBarangButton"
                             class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover-bg-blue-700 dark:focus-ring-blue-800">Tambah
                             Barang</button>
@@ -125,7 +131,7 @@
                     <td class="py-2 px-4 border-b text-center">${counter}</td>
                     <td class="py-2 px-4 border-b text-center">${barang.nama_barang}</td>
                     <td class="py-2 px-4 border-b text-center">${barang.deskripsi_barang}</td>
-                    <td class="py-2 px-4 border-b text-center">${barang.harga_barang}</td>
+                    <td class="py-2 px-4 border-b text-center">${(barang.harga_barang / 100).toFixed(2)}</td>
                     <td class="py-2 px-4 border-b text-center">
                         <button class="btn-bayar" data-nama="${barang.nama_barang}" data-deskripsi="${barang.deskripsi_barang}" data-harga="${barang.harga_barang}">Bayar</button>
                     </td>
@@ -211,6 +217,38 @@
 
             fetchAndDisplayData();
         });
+
+        $(document).ready(function() {
+            $("#createBarangButton").click(function() {
+                validateForm();
+            });
+        });
+
+        function validateForm() {
+            $("input").removeClass("border-red-500");
+
+            var namaBarang = $("#nama_barang").val();
+            var deskripsiBarang = $("#deskripsi_barang").val();
+            var hargaBarang = $("#harga_barang").val();
+
+            if (namaBarang === "") {
+                $("#nama_barang").addClass("border-red-500").focus();
+                alert("Sila isi Nama Item.");
+                return;
+            }
+
+            if (deskripsiBarang === "") {
+                $("#deskripsi_barang").addClass("border-red-500").focus();
+                alert("Sila isi Penerangan Barang.");
+                return;
+            }
+
+            if (hargaBarang === "") {
+                $("#harga_barang").addClass("border-red-500").focus();
+                alert("Sila isi Harga Item.");
+                return;
+            }
+        }
     </script>
 
 @endsection
