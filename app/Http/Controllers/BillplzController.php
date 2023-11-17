@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\history;
 use App\Models\payment;
 use App\Models\Barang;
+use Illuminate\Support\Facades\Log;
+use App\Models\Callback;
 
 class BillplzController extends Controller
 {
@@ -34,41 +36,41 @@ class BillplzController extends Controller
         return response()->json($bill);
     }
 
-    public function createBill(Request $request)
-    {
-        $apiKey = env('BILLPLZ_API_KEY');
-        $collection = env('BILLPLZ_COLLECTION');
+    // public function createBill(Request $request)
+    // {
+    //     $apiKey = env('BILLPLZ_API_KEY');
+    //     $collection = env('BILLPLZ_COLLECTION');
 
-        $collectionId = $request->input('collection_id', $collection);
-        $description = $request->input('description');
-        $email = $request->input('email', 'tes@tes.com');
-        $name = $request->input('name');
-        $amount = $request->input('amount');
-        $callbackUrl = $request->input('callback_url', '0');
+    //     $collectionId = $request->input('collection_id', $collection);
+    //     $description = $request->input('description');
+    //     $email = $request->input('email', 'tes@tes.com');
+    //     $name = $request->input('name');
+    //     $amount = $request->input('amount');
+    //     $callbackUrl = $request->input('callback_url', '0');
 
-        $response = Http::withBasicAuth($apiKey, '')
-            ->post('https://www.billplz-sandbox.com/api/v3/bills', [
-                'collection_id' => $collectionId,
-                'description' => $description,
-                'email' => $email,
-                'name' => $name,
-                'amount' => $amount,
-                'callback_url' => $callbackUrl
-            ]);
+    //     $response = Http::withBasicAuth($apiKey, '')
+    //         ->post('https://www.billplz-sandbox.com/api/v3/bills', [
+    //             'collection_id' => $collectionId,
+    //             'description' => $description,
+    //             'email' => $email,
+    //             'name' => $name,
+    //             'amount' => $amount,
+    //             'callback_url' => $callbackUrl
+    //         ]);
 
-        $billData = $response->json();
+    //     $billData = $response->json();
 
-        $callbackUrl = $billData['url'];
+    //     $callbackUrl = $billData['url'];
 
-        $billData['id_pembayaran'] = $billData['id'];
-        unset($billData['id']);
+    //     $billData['id_pembayaran'] = $billData['id'];
+    //     unset($billData['id']);
 
-        Payment::create($billData);
+    //     Payment::create($billData);
 
-        $urlFromResponse = $billData['url'];
+    //     $urlFromResponse = $billData['url'];
 
-        return redirect($urlFromResponse);
-    }
+    //     return redirect($urlFromResponse);
+    // }
 
     public function getPayment(Request $request)
     {
@@ -207,5 +209,97 @@ class BillplzController extends Controller
         } else {
             return response()->json(['error' => 'Produk tidak ditemukan'], 404);
         }
+    }
+
+    public function createBill(Request $request)
+    {
+        $apiKey = env('BILLPLZ_API_KEY');
+        $collectionId = env('BILLPLZ_COLLECTION');
+
+        try {
+            $response = Http::withBasicAuth($apiKey, '')
+                ->post('https://www.billplz-sandbox.com/api/v3/bills', [
+                    'collection_id' => $collectionId,
+                    'description' => 'Pembayaran yang mudah, keselesaan yang berpanjangan.',
+                    'email' => 'sanks@gmail.com',
+                    'name' => 'Sanks',
+                    'amount' => 300,
+                    'callback_url' => url('handleBillplzCallback'),
+                ]);
+            $billData = $response->json();
+
+            $bill = new payment();
+            $bill->bill_id = $billData['id'];
+            $bill->collection_id = $billData['collection_id'];
+            $bill->paid = $billData['paid'];
+            $bill->state = $billData['state'];
+            $bill->amount = $billData['amount'];
+            $bill->paid_amount = $billData['paid_amount'];
+            $bill->due_at = $billData['due_at'];
+            $bill->email = $billData['email'];
+            $bill->mobile = $billData['mobile'];
+            $bill->name = $billData['name'];
+            $bill->url = $billData['url'];
+            $bill->reference_1_label = $billData['reference_1_label'];
+            $bill->reference_1 = $billData['reference_1'];
+            $bill->reference_2_label = $billData['reference_2_label'];
+            $bill->reference_2 = $billData['reference_2'];
+            $bill->redirect_url = $billData['redirect_url'];
+            $bill->callback_url = $billData['callback_url'];
+            $bill->description = $billData['description'];
+            $bill->paid_at = $billData['paid_at'];
+
+            $this->handleBillplzCallback($request->merge($billData));
+
+            $bill->save();
+            Log::info("Tagihan berhasil dibuat. Bill ID: {$billData['id']}, URL: {$billData['url']}");
+            return redirect($billData['url']);
+        } catch (\Exception $e) {
+            Log::error("Terjadi kesalahan saat membuat tagihan: {$e->getMessage()}");
+
+            return response()->json(['error' => 'Terjadi kesalahan internal.'], 500);
+        }
+    }
+
+    public function handleBillplzCallback(Request $request)
+    {
+        Log::info('Callback received from Billplz', $request->all());
+
+
+        if ($request->input('paid') === 'true') {
+            $billId = $request->input('id');
+            $amount = $request->input('amount');
+            $paidAt = $request->input('paid_at');
+            $paidAmount = $request->input('paid_amount');
+            $state = $request->input('state');
+
+            $bill = payment::where('bill_id', $billId)->first();
+
+            if ($bill) {
+                $bill->paid_amount = $paidAmount;
+                $bill->paid = true;
+                $bill->state = $state;
+                $bill->save();
+
+                $pembayaran = new Callback();
+                $pembayaran->bill_id = $billId;
+                $pembayaran->amount = $amount;
+                $pembayaran->paid_at = $paidAt;
+                $pembayaran->save();
+
+                Log::info("Pembayaran berhasil. Bill ID: $billId, Amount: $amount, Paid At: $paidAt");
+            } else {
+                Log::warning("Tagihan tidak ditemukan. Bill ID: $billId");
+            }
+
+            Log::info("Pembayaran berhasil. Bill ID: $billId, Amount: $amount, Paid At: $paidAt");
+        } else {
+            $billId = $request->input('id');
+
+
+            Log::warning("Pembayaran tidak berhasil. Bill ID: $billId");
+        }
+
+        return response('OK');
     }
 }

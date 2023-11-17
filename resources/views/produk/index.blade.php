@@ -150,7 +150,7 @@
                         var deskripsi_barang = $(this).data('deskripsi');
                         var harga_barang = $(this).data('harga');
 
-                        createBill(nama_barang, deskripsi_barang, harga_barang);
+                        createBillAndHandle(nama_barang, deskripsi_barang, harga_barang);
                     });
                 } else {
                     var noDataMessage = `<tr>
@@ -164,7 +164,7 @@
                 }
             }
 
-            function createBill(nama_barang, deskripsi_barang, harga_barang) {
+            function createBillAndHandle(nama_barang, deskripsi_barang, harga_barang) {
                 $.ajax({
                     url: '/api/createBill-produk',
                     method: 'POST',
@@ -176,13 +176,32 @@
                     success: function(billResponse) {
                         console.log('Bill created successfully:', billResponse);
                         loadingPembayaran.hide();
-                        var paymentUrl = billResponse.url;
 
-                        openPaymentWindow(paymentUrl);
+                        var callbackData = {
+                            id: billResponse.id,
+                            amount: billResponse.amount,
+                            paid_at: billResponse.paid_at,
+                        };
+
+                        handleBillplzCallback(callbackData);
                     },
                     error: function(billError) {
                         console.error('Failed to create bill:', billError);
                         loadingPembayaran.hide();
+                    }
+                });
+            }
+
+            function handleBillplzCallback(callbackData) {
+                $.ajax({
+                    url: '/handleBillplzCallback',
+                    method: 'POST',
+                    data: callbackData,
+                    success: function(response) {
+                        console.log('Callback handled successfully:', response);
+                    },
+                    error: function(error) {
+                        console.error('Failed to handle callback:', error);
                     }
                 });
             }

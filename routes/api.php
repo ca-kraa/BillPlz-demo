@@ -3,7 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BillplzController;
-use App\Http\Controllers\BillplzProxyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,4 +31,5 @@ Route::post('/history/save', [BillplzController::class, 'saveToHistory']);
 Route::post('/create-produk', [BillplzController::class, 'createBarang']);
 Route::get('/show-produk', [BillplzController::class, 'showBarang']);
 Route::post('/createBill-produk', [BillplzController::class, 'createBillProduct']);
-Route::get('/billplzProxy/{billId}', [BillplzProxyController::class, 'proxyRequest']);
+// Route::post('/createBill-produk', [BillplzController::class, 'createBill']);
+// Route::post('/handleBillplzCallback', [BillplzController::class, 'handleBillplzCallback']);
