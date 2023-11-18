@@ -110,37 +110,4 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    {{--
-    <script>
-        document.getElementById('createBarangButton').addEventListener('click', function() {
-            var nama_barang = document.getElementById('nama_barang').value;
-            var deskripsi_barang = document.getElementById('deskripsi_barang').value;
-            var harga_barang = document.getElementById('harga_barang').value;
-            var _token = $('meta[name="csrf-token"]').attr('content'); // Ambil token CSRF dari meta tag
-
-
-            var data = {
-                'nama_barang': nama_barang,
-                'deskripsi_barang': deskripsi_barang,
-                'harga_barang': harga_barang,
-                _token: _token
-
-            };
-
-            fetch('/create-produk', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = '/product';
-                    } else {}
-                });
-        });
-    </script> --}}
-
 @endsection
