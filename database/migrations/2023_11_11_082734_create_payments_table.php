@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->string('id_pembayaran')->nullable();
+            $table->string('bill_id')->nullable();
             $table->string('collection_id')->nullable();
             $table->string('paid')->nullable();
             $table->string('state')->nullable();
