@@ -35,7 +35,9 @@
                         <td class="text-center align-middle">{{ $barang->deskripsi_barang }}</td>
                         <td class="text-center align-middle">{{ $barang->harga_barang }}</td>
                         <td class="text-center align-middle">
-                            <a href="{{ route('create.bill', ['barangId' => $barang->id]) }}" class="btn-bayar">Bayar</a>
+                            <a href="#"
+                                onclick="window.open('{{ route('create.bill', ['barangId' => $barang->id]) }}', 'newwindow', 'width=425,height=566'); return false;"
+                                class="btn-bayar">Bayar</a>
                         </td>
                     </tr>
                 @endforeach
@@ -108,6 +110,5 @@
             <p class="text-gray-700">Bayaran anda sedang berjalan</p>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 @endsection
