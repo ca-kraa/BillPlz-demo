@@ -214,18 +214,19 @@ class BillplzController extends Controller
     public function createBill(Request $request)
     {
         $apiKey = env('BILLPLZ_API_KEY');
-        $collectionId = env('BILLPLZ_COLLECTION');
+        $collectionId = $request->input('collection_id', env('BILLPLZ_COLLECTION'));
 
         try {
             $response = Http::withBasicAuth($apiKey, '')
                 ->post('https://www.billplz-sandbox.com/api/v3/bills', [
                     'collection_id' => $collectionId,
-                    'description' => 'Pembayaran yang mudah, keselesaan yang berpanjangan.',
-                    'email' => 'sanks@gmail.com',
-                    'name' => 'Sanks',
-                    'amount' => 300,
-                    'callback_url' => url('handleBillplzCallback'),
+                    'description' => $request->input('description', 'Pembayaran yang mudah, keselesaan yang berpanjangan.'),
+                    'email' => $request->input('email', 'sanks@gmail.com'),
+                    'name' => $request->input('name', 'Sanks'),
+                    'amount' => $request->input('amount', 300),
+                    'callback_url' => $request->input('callback_url', url('handleBillplzCallback')),
                 ]);
+
             $billData = $response->json();
 
             $bill = new payment();
@@ -252,14 +253,15 @@ class BillplzController extends Controller
             $this->handleBillplzCallback($request->merge($billData));
 
             $bill->save();
+            Log::info('Received createBill request:', $request->all());
             Log::info("Tagihan berhasil dibuat. Bill ID: {$billData['id']}, URL: {$billData['url']}");
             return redirect($billData['url']);
         } catch (\Exception $e) {
             Log::error("Terjadi kesalahan saat membuat tagihan: {$e->getMessage()}");
-
             return response()->json(['error' => 'Terjadi kesalahan internal.'], 500);
         }
     }
+
 
     public function handleBillplzCallback(Request $request)
     {
@@ -301,5 +303,11 @@ class BillplzController extends Controller
         }
 
         return response('OK');
+    }
+
+    public function showDataOriginal()
+    {
+        $barangs = Barang::all();
+        return view('produk.index', ['barangs' => $barangs]);
     }
 }

@@ -24,10 +24,18 @@
                     <th class="py-2 px-4 border-b text-center">Tindakan</th>
                 </tr>
             </thead>
-            <tbody id="barangTableBody">
-                <tr>
-                    <td id="loadingMessage" colspan="5" class="text-center">Loading...</td>
-                </tr>
+            <tbody>
+                @php
+                    $no = 1;
+                @endphp
+                @foreach ($barangs as $barang)
+                    <tr>
+                        <td class="text-center align-middle">{{ $no++ }}</td>
+                        <td class="text-center align-middle">{{ $barang->nama_barang }}</td>
+                        <td class="text-center align-middle">{{ $barang->deskripsi_barang }}</td>
+                        <td class="text-center align-middle">{{ $barang->harga_barang }}</td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
 
@@ -97,7 +105,7 @@
             <p class="text-gray-700">Bayaran anda sedang berjalan</p>
         </div>
     </div>
-
+    {{--
     <script>
         $(document).ready(function() {
             let loadingMessage = $('#loadingMessage');
@@ -166,7 +174,7 @@
 
             function createBillAndHandle(nama_barang, deskripsi_barang, harga_barang) {
                 $.ajax({
-                    url: '/api/createBill-produk',
+                    url: '/createBill-produk',
                     method: 'POST',
                     data: {
                         name: nama_barang,
@@ -183,7 +191,193 @@
                             paid_at: billResponse.paid_at,
                         };
 
+                        console.log('Callback data:', callbackData);
+
                         handleBillplzCallback(callbackData);
+                    },
+
+                    error: function(billError) {
+                        console.error('Failed to create bill:', billError);
+                        loadingPembayaran.hide();
+                    }
+                });
+            }
+
+
+            function handleBillplzCallback(callbackData) {
+                $.ajax({
+                    url: '/handleBillplzCallback',
+                    method: 'POST',
+                    data: callbackData,
+                    success: function(response) {
+                        console.log('Callback handled successfully:', response);
+                    },
+                    error: function(error) {
+                        console.error('Failed to handle callback:', error);
+                    }
+                });
+            }
+
+            function openPaymentWindow(paymentUrl) {
+                var paymentWindow = window.open(paymentUrl, '_blank');
+                if (paymentWindow) {
+                    paymentWindow.focus();
+                } else {
+                    alert(
+                        'Popup blocker is preventing the payment window from opening. Please disable the popup blocker and try again.'
+                    );
+                }
+            }
+
+
+            $('#createBarangButton').click(function() {
+                var nama_barang = $('#nama_barang').val();
+                var deskripsi_barang = $('#deskripsi_barang').val();
+                var harga_barang = $('#harga_barang').val();
+
+                $.ajax({
+                    url: '/api/create-produk',
+                    method: 'POST',
+                    data: {
+                        nama_barang: nama_barang,
+                        deskripsi_barang: deskripsi_barang,
+                        harga_barang: harga_barang,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alert('Data berhasil disimpan!');
+                        fetchAndDisplayData();
+                    },
+                    error: function(error) {
+                        console.error('Gagal menambahkan barang:', error);
+                    }
+                });
+            });
+
+            fetchAndDisplayData();
+        });
+
+        $(document).ready(function() {
+            $("#createBarangButton").click(function() {
+                validateForm();
+            });
+        });
+
+        function validateForm() {
+            $("input").removeClass("border-red-500");
+
+            var namaBarang = $("#nama_barang").val();
+            var deskripsiBarang = $("#deskripsi_barang").val();
+            var hargaBarang = $("#harga_barang").val();
+
+            if (namaBarang === "") {
+                $("#nama_barang").addClass("border-red-500").focus();
+                alert("Sila isi Nama Item.");
+                return;
+            }
+
+            if (deskripsiBarang === "") {
+                $("#deskripsi_barang").addClass("border-red-500").focus();
+                alert("Sila isi Penerangan Barang.");
+                return;
+            }
+
+            if (hargaBarang === "") {
+                $("#harga_barang").addClass("border-red-500").focus();
+                alert("Sila isi Harga Item.");
+                return;
+            }
+        }
+    </script> --}}
+
+    {{-- <script>
+        $(document).ready(function() {
+            let loadingMessage = $('#loadingMessage');
+            let loadingPembayaran = $('#loadingPembayaran');
+
+            loadingMessage.text('Loading...');
+            loadingPembayaran.hide();
+
+            function fetchAndDisplayData() {
+                $.ajax({
+                    url: '/api/show-produk',
+                    method: 'GET',
+                    success: function(response) {
+                        handleProductData(response.data);
+                    },
+                    error: function(error) {
+                        console.error('Failed to fetch data:', error);
+                        loadingMessage.text('');
+                    }
+                });
+            }
+
+            function handleProductData(data) {
+                var counter = 1;
+                var barangTableBody = $('#barangTableBody');
+                barangTableBody.empty();
+
+                if (data.length > 0) {
+                    data.forEach(function(barang) {
+                        var row = `<tr>
+                    <td class="py-2 px-4 border-b text-center">${counter}</td>
+                    <td class="py-2 px-4 border-b text-center">${barang.nama_barang}</td>
+                    <td class="py-2 px-4 border-b text-center">${barang.deskripsi_barang}</td>
+                    <td class="py-2 px-4 border-b text-center">${(barang.harga_barang / 100).toFixed(2)}</td>
+                    <td class="py-2 px-4 border-b text-center">
+                        <button class="btn-bayar" data-nama="${barang.nama_barang}" data-deskripsi="${barang.deskripsi_barang}" data-harga="${barang.harga_barang}">Bayar</button>
+                    </td>
+                </tr>`;
+
+                        barangTableBody.append(row);
+
+                        counter++;
+                    });
+
+                    loadingMessage.text('');
+
+                    $('.btn-bayar').click(function() {
+                        loadingPembayaran.show();
+                        var nama_barang = $(this).data('nama');
+                        var deskripsi_barang = $(this).data('deskripsi');
+                        var harga_barang = $(this).data('harga');
+
+                        createBillAndHandleNew(nama_barang, deskripsi_barang, harga_barang);
+                    });
+                } else {
+                    var noDataMessage = `<tr>
+                <td colspan="5" class="py-2 px-4 border-b text-center">
+                    <i class="fa-regular fa-face-sad-cry"></i> Sila tambahkan produk terlebih dahulu.
+                </td>
+            </tr>`;
+                    barangTableBody.append(noDataMessage);
+
+                    loadingMessage.text('');
+                }
+            }
+
+            function createBillAndHandleNew(nama_barang, deskripsi_barang, harga_barang) {
+                $.ajax({
+                    url: '/createBill-produk',
+                    method: 'POST',
+                    data: {
+                        name: nama_barang,
+                        description: deskripsi_barang,
+                        amount: harga_barang,
+                    },
+                    success: function(billResponse) {
+                        console.log('Bill created successfully:', billResponse);
+                        loadingPembayaran.hide();
+
+                        var callbackData = {
+                            id: billResponse.id,
+                            amount: billResponse.amount,
+                            paid_at: billResponse.paid_at,
+                        };
+
+                        console.log('Callback data:', callbackData);
+
+                        handleBillplzCallbackNew(callbackData);
                     },
                     error: function(billError) {
                         console.error('Failed to create bill:', billError);
@@ -192,9 +386,9 @@
                 });
             }
 
-            function handleBillplzCallback(callbackData) {
+            function handleBillplzCallbackNew(callbackData) {
                 $.ajax({
-                    url: '/handleBillplzCallback',
+                    url: 'handleBillplzCallback',
                     method: 'POST',
                     data: callbackData,
                     success: function(response) {
@@ -268,6 +462,158 @@
                 return;
             }
         }
-    </script>
+    </script> --}}
+
+    {{-- <script>
+        $(document).ready(function() {
+            let loadingMessage = $('#loadingMessage');
+            let loadingPembayaran = $('#loadingPembayaran');
+
+            loadingMessage.text('Loading...');
+            loadingPembayaran.hide();
+
+            function fetchAndDisplayData() {
+                $.ajax({
+                    url: '/api/show-produk',
+                    method: 'GET',
+                    success: function(response) {
+                        handleProductData(response.data);
+                    },
+                    error: function(error) {
+                        console.error('Failed to fetch data:', error);
+                        loadingMessage.text('');
+                    }
+                });
+            }
+
+            function handleProductData(data) {
+                var counter = 1;
+                var barangTableBody = $('#barangTableBody');
+                barangTableBody.empty();
+
+                if (data.length > 0) {
+                    data.forEach(function(barang) {
+                        var row = `<tr>
+                    <td class="py-2 px-4 border-b text-center">${counter}</td>
+                    <td class="py-2 px-4 border-b text-center">${barang.nama_barang}</td>
+                    <td class="py-2 px-4 border-b text-center">${barang.deskripsi_barang}</td>
+                    <td class="py-2 px-4 border-b text-center">${(barang.harga_barang / 100).toFixed(2)}</td>
+                    <td class="py-2 px-4 border-b text-center">
+                        <button class="btn-bayar" data-nama="${barang.nama_barang}" data-deskripsi="${barang.deskripsi_barang}" data-harga="${barang.harga_barang}">Bayar</button>
+                    </td>
+                </tr>`;
+
+                        barangTableBody.append(row);
+
+                        counter++;
+                    });
+
+                    loadingMessage.text('');
+
+                    $('.btn-bayar').click(function() {
+                        loadingPembayaran.show();
+                        var nama_barang = $(this).data('nama');
+                        var deskripsi_barang = $(this).data('deskripsi');
+                        var harga_barang = $(this).data('harga');
+
+                        // Use the new AJAX request for payment creation and handling
+                        createBillAndHandleNew(nama_barang, deskripsi_barang, harga_barang);
+                    });
+                } else {
+                    var noDataMessage = `<tr>
+                <td colspan="5" class="py-2 px-4 border-b text-center">
+                    <i class="fa-regular fa-face-sad-cry"></i> Sila tambahkan produk terlebih dahulu.
+                </td>
+            </tr>`;
+                    barangTableBody.append(noDataMessage);
+
+                    loadingMessage.text('');
+                }
+            }
+
+            function createBillAndHandleNew(nama_barang, deskripsi_barang, harga_barang) {
+                $.ajax({
+                    url: '/createBill-produk',
+                    method: 'POST',
+                    data: {
+                        name: nama_barang,
+                        description: deskripsi_barang,
+                        amount: harga_barang,
+                    },
+                    success: function(billResponse) {
+                        console.log('Bill created successfully:', billResponse);
+                        loadingPembayaran.hide();
+
+                        var paymentUrl = billResponse.url;
+
+                        // Redirect to the payment URL
+                        window.location.href = paymentUrl;
+                    },
+                    error: function(billError) {
+                        console.error('Failed to create bill:', billError);
+                        loadingPembayaran.hide();
+                    }
+                });
+            }
+
+            $('#createBarangButton').click(function() {
+                var nama_barang = $('#nama_barang').val();
+                var deskripsi_barang = $('#deskripsi_barang').val();
+                var harga_barang = $('#harga_barang').val();
+
+                $.ajax({
+                    url: '/api/create-produk',
+                    method: 'POST',
+                    data: {
+                        nama_barang: nama_barang,
+                        deskripsi_barang: deskripsi_barang,
+                        harga_barang: harga_barang,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alert('Data berhasil disimpan!');
+                        fetchAndDisplayData();
+                    },
+                    error: function(error) {
+                        console.error('Gagal menambahkan barang:', error);
+                    }
+                });
+            });
+
+            fetchAndDisplayData();
+        });
+
+        $(document).ready(function() {
+            $("#createBarangButton").click(function() {
+                validateForm();
+            });
+        });
+
+        function validateForm() {
+            $("input").removeClass("border-red-500");
+
+            var namaBarang = $("#nama_barang").val();
+            var deskripsiBarang = $("#deskripsi_barang").val();
+            var hargaBarang = $("#harga_barang").val();
+
+            if (namaBarang === "") {
+                $("#nama_barang").addClass("border-red-500").focus();
+                alert("Sila isi Nama Item.");
+                return;
+            }
+
+            if (deskripsiBarang === "") {
+                $("#deskripsi_barang").addClass("border-red-500").focus();
+                alert("Sila isi Penerangan Barang.");
+                return;
+            }
+
+            if (hargaBarang === "") {
+                $("#harga_barang").addClass("border-red-500").focus();
+                alert("Sila isi Harga Item.");
+                return;
+            }
+        }
+    </script> --}}
 
 @endsection
