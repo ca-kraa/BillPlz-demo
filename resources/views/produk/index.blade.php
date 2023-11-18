@@ -14,7 +14,7 @@
     <div class="max-w-2xl mx-auto bg-white p-8 rounded-md shadow-md">
         <h1 class="text-2xl font-bold mb-6">List Barang</h1>
 
-        <table class="min-w-full bg-white border border-gray-300">
+        <table class="min-w-full bg-white border border-gray-300" id="badagbanget">
             <thead>
                 <tr>
                     <th class="py-2 px-4 border-b text-center">#</th>
@@ -64,7 +64,8 @@
                     </button>
                 </div>
                 <div class="p-4 md:p-5">
-                    <form id="createBarangForm" class="space-y-4">
+                    <form id="createBarangForm" action="{{ route('produk.store') }}" method="post" class="space-y-4">
+                        @csrf
                         <div>
                             <label for="nama_barang"
                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama Item</label>
@@ -84,18 +85,17 @@
                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Item</label>
                             <div class="relative">
                                 <span
-                                    class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-gray-900 dark:text-white">
-                                    RM
-                                </span>
+                                    class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-gray-900 dark:text-white">RM</span>
                                 <input type="number" name="harga_barang" id="harga_barang" step="0.01"
                                     class="pl-8 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                                     required>
                             </div>
+                            <span id="harga_preview" class="text-sm text-gray-500 mt-1 block"></span>
                         </div>
-
-                        <button type="button" id="createBarangButton"
+                        <button type="submit" id="createBarangButton"
                             class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover-bg-blue-700 dark:focus-ring-blue-800">Tambah
                             Barang</button>
+
                     </form>
                 </div>
             </div>
@@ -108,5 +108,39 @@
             <p class="text-gray-700">Bayaran anda sedang berjalan</p>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    {{--
+    <script>
+        document.getElementById('createBarangButton').addEventListener('click', function() {
+            var nama_barang = document.getElementById('nama_barang').value;
+            var deskripsi_barang = document.getElementById('deskripsi_barang').value;
+            var harga_barang = document.getElementById('harga_barang').value;
+            var _token = $('meta[name="csrf-token"]').attr('content'); // Ambil token CSRF dari meta tag
+
+
+            var data = {
+                'nama_barang': nama_barang,
+                'deskripsi_barang': deskripsi_barang,
+                'harga_barang': harga_barang,
+                _token: _token
+
+            };
+
+            fetch('/create-produk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/product';
+                    } else {}
+                });
+        });
+    </script> --}}
 
 @endsection

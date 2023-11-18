@@ -32,5 +32,9 @@ Route::post('/payment/create', [BillplzController::class, 'createBill'])->name('
 Route::post('/handleBillplzCallback', [BillplzController::class, 'handleBillplzCallback'])->name('handle-billplz-callback');
 Route::get('/create-bill/{barangId}', [BillplzController::class, 'createBill'])->name('create.bill');
 
+Route::post('/create-produk', [BillplzController::class, 'createBarang']);
 
 Route::get('/product', [BillplzController::class, 'showDataOriginal']);
+
+Route::get('/produk/create', [BillplzController::class, 'create'])->name('produk.create');
+Route::post('/product', [BillplzController::class, 'store'])->name('produk.store');

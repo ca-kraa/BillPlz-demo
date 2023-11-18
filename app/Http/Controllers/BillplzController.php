@@ -144,21 +144,22 @@ class BillplzController extends Controller
         return view('payment.create-bill');
     }
 
-    public function createBarang(Request $request)
-    {
-        $validatedData = $request->validate([
-            'nama_barang' => 'required|string',
-            'deskripsi_barang' => 'required|string',
-            'harga_barang' => 'required|numeric',
-        ]);
+    // public function createBarang(Request $request)
+    // {
+    //     $request->validate([
+    //         'nama_barang' => 'required',
+    //         'deskripsi_barang' => 'required',
+    //         'harga_barang' => 'required|numeric',
+    //     ]);
 
-        $barang = Barang::create($validatedData);
+    //     Barang::create([
+    //         'nama_barang' => $request->nama_barang,
+    //         'deskripsi_barang' => $request->deskripsi_barang,
+    //         'harga_barang' => $request->harga_barang,
+    //     ]);
+    //     return view('produk.index');
+    // }
 
-        return response()->json([
-            'message' => 'Data Barang berhasil dibuat',
-            'data' => $barang,
-        ], 201);
-    }
 
     public function showBarang(Request $request)
     {
@@ -283,12 +284,6 @@ class BillplzController extends Controller
 
             $bill = payment::where('bill_id', $billId)->first();
 
-            // $pembayaran = new Pembayarans();
-            // $pembayaran->bill_id = $billId;
-            // $pembayaran->amount = $amount;
-            // $pembayaran->paid_at = $paidAt;
-            // $pembayaran->save();
-
             if ($bill) {
                 $bill->paid_amount = $paidAmount;
                 $bill->paid = true;
@@ -322,5 +317,27 @@ class BillplzController extends Controller
     {
         $barangs = Barang::all();
         return view('produk.index', ['barangs' => $barangs]);
+    }
+
+    public function create()
+    {
+        return view('produk.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama_barang' => 'required',
+            'deskripsi_barang' => 'required',
+            'harga_barang' => 'required|numeric',
+        ]);
+
+        Barang::create([
+            'nama_barang' => $request->nama_barang,
+            'deskripsi_barang' => $request->deskripsi_barang,
+            'harga_barang' => $request->harga_barang,
+        ]);
+
+        return redirect()->route('produk.store');
     }
 }
