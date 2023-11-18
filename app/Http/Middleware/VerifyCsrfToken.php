@@ -15,6 +15,6 @@ class VerifyCsrfToken extends Middleware
         'handleBillplzCallback',
         'createBill',
         'createBillAndHandle',
-        'createBill-produk'
+        'createBill-produk',
     ];
 }

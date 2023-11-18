@@ -211,21 +211,27 @@ class BillplzController extends Controller
         }
     }
 
-    public function createBill(Request $request)
+    public function createBill(Request $request, $barangId)
     {
         $apiKey = env('BILLPLZ_API_KEY');
         $collectionId = $request->input('collection_id', env('BILLPLZ_COLLECTION'));
 
+        $barang = $request->input('barang');
+
+
         try {
+            $barang = Barang::findOrFail($barangId);
+
             $response = Http::withBasicAuth($apiKey, '')
                 ->post('https://www.billplz-sandbox.com/api/v3/bills', [
                     'collection_id' => $collectionId,
-                    'description' => $request->input('description', 'Pembayaran yang mudah, keselesaan yang berpanjangan.'),
+                    'description' => $barang->deskripsi_barang,
                     'email' => $request->input('email', 'sanks@gmail.com'),
-                    'name' => $request->input('name', 'Sanks'),
-                    'amount' => $request->input('amount', 300),
+                    'name' => $barang->nama_barang,
+                    'amount' => $barang->harga_barang * 100,
                     'callback_url' => $request->input('callback_url', url('handleBillplzCallback')),
                 ]);
+
 
             $billData = $response->json();
 
@@ -277,6 +283,12 @@ class BillplzController extends Controller
 
             $bill = payment::where('bill_id', $billId)->first();
 
+            // $pembayaran = new Pembayarans();
+            // $pembayaran->bill_id = $billId;
+            // $pembayaran->amount = $amount;
+            // $pembayaran->paid_at = $paidAt;
+            // $pembayaran->save();
+
             if ($bill) {
                 $bill->paid_amount = $paidAmount;
                 $bill->paid = true;
@@ -304,6 +316,7 @@ class BillplzController extends Controller
 
         return response('OK');
     }
+
 
     public function showDataOriginal()
     {
