@@ -30,6 +30,5 @@ Route::post('/history/save', [BillplzController::class, 'saveToHistory']);
 // Produk
 Route::post('/create-produk', [BillplzController::class, 'createBarang']);
 Route::get('/show-produk', [BillplzController::class, 'showBarang']);
-Route::post('/createBill-produk', [BillplzController::class, 'createBillProduct']);
+// Route::post('/createBill-produk', [BillplzController::class, 'createBillProduct']);
 // Route::post('/createBill-produk', [BillplzController::class, 'createBill']);
-// Route::post('/handleBillplzCallback', [BillplzController::class, 'handleBillplzCallback']);

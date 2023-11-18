@@ -211,21 +211,28 @@ class BillplzController extends Controller
         }
     }
 
-    public function createBill(Request $request)
+    public function createBill(Request $request, $barangId)
     {
         $apiKey = env('BILLPLZ_API_KEY');
-        $collectionId = env('BILLPLZ_COLLECTION');
+        $collectionId = $request->input('collection_id', env('BILLPLZ_COLLECTION'));
+
+        $barang = $request->input('barang');
+
 
         try {
+            $barang = Barang::findOrFail($barangId);
+
             $response = Http::withBasicAuth($apiKey, '')
                 ->post('https://www.billplz-sandbox.com/api/v3/bills', [
                     'collection_id' => $collectionId,
-                    'description' => 'Pembayaran yang mudah, keselesaan yang berpanjangan.',
-                    'email' => 'sanks@gmail.com',
-                    'name' => 'Sanks',
-                    'amount' => 300,
-                    'callback_url' => url('handleBillplzCallback'),
+                    'description' => $barang->deskripsi_barang,
+                    'email' => $request->input('email', 'sanks@gmail.com'),
+                    'name' => $barang->nama_barang,
+                    'amount' => $barang->harga_barang * 100,
+                    'callback_url' => $request->input('callback_url', url('handleBillplzCallback')),
                 ]);
+
+
             $billData = $response->json();
 
             $bill = new payment();
@@ -252,14 +259,15 @@ class BillplzController extends Controller
             $this->handleBillplzCallback($request->merge($billData));
 
             $bill->save();
+            Log::info('Received createBill request:', $request->all());
             Log::info("Tagihan berhasil dibuat. Bill ID: {$billData['id']}, URL: {$billData['url']}");
             return redirect($billData['url']);
         } catch (\Exception $e) {
             Log::error("Terjadi kesalahan saat membuat tagihan: {$e->getMessage()}");
-
             return response()->json(['error' => 'Terjadi kesalahan internal.'], 500);
         }
     }
+
 
     public function handleBillplzCallback(Request $request)
     {
@@ -274,6 +282,12 @@ class BillplzController extends Controller
             $state = $request->input('state');
 
             $bill = payment::where('bill_id', $billId)->first();
+
+            // $pembayaran = new Pembayarans();
+            // $pembayaran->bill_id = $billId;
+            // $pembayaran->amount = $amount;
+            // $pembayaran->paid_at = $paidAt;
+            // $pembayaran->save();
 
             if ($bill) {
                 $bill->paid_amount = $paidAmount;
@@ -301,5 +315,12 @@ class BillplzController extends Controller
         }
 
         return response('OK');
+    }
+
+
+    public function showDataOriginal()
+    {
+        $barangs = Barang::all();
+        return view('produk.index', ['barangs' => $barangs]);
     }
 }
