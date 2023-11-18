@@ -35,8 +35,7 @@
                         <td class="text-center align-middle">{{ $barang->deskripsi_barang }}</td>
                         <td class="text-center align-middle">{{ $barang->harga_barang }}</td>
                         <td class="text-center align-middle">
-                            <a href="#"
-                                onclick="window.open('{{ route('create.bill', ['barangId' => $barang->id]) }}', 'newwindow', 'width=425,height=566'); return false;"
+                            <a href="#" onclick="showLoading(); openWindow(); return false;"
                                 class="btn-bayar">Bayar</a>
                         </td>
                     </tr>
@@ -110,5 +109,23 @@
             <p class="text-gray-700">Bayaran anda sedang berjalan</p>
         </div>
     </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loadingPembayaran').classList.remove('hidden');
+        }
+
+        function openWindow() {
+            var newWindow = window.open('{{ route('create.bill', ['barangId' => $barang->id]) }}', 'newwindow',
+                'width=425,height=600');
+
+            if (newWindow) {
+                newWindow.onfocus = function() {
+                    document.getElementById('loadingPembayaran').classList.add('hidden');
+                }
+            }
+        }
+    </script>
+
 
 @endsection
