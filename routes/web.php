@@ -31,3 +31,7 @@ Route::get('/product', [BillplzController::class, 'showDataOriginal']);
 
 Route::get('/produk/create', [BillplzController::class, 'create'])->name('produk.create');
 Route::post('/product', [BillplzController::class, 'store'])->name('produk.store');
+
+Route::get('/logpayment', function () {
+    return view('payment.log');
+});
