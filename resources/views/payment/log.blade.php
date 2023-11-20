@@ -1,5 +1,5 @@
 @extends('layout.main')
-@section('title', 'Cek Pembayaran')
+@section('title', 'Log Pembayaran')
 
 @section('content')
 

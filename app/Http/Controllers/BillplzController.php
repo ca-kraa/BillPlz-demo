@@ -36,32 +36,6 @@ class BillplzController extends Controller
         return response()->json($bill);
     }
 
-    // public function createBill(Request $request)
-    // {
-    //     $apiKey = env('BILLPLZ_API_KEY');
-    //     $collection = env('BILLPLZ_COLLECTION');
-
-    //     $collectionId = $request->input('collection_id', $collection);
-    //     $description = $request->input('description');
-    //     $email = $request->input('email', 'tes@tes.com');
-    //     $name = $request->input('name');
-    //     $amount = $request->input('amount');
-    //     $callbackUrl = $request->input('callback_url', '0');
-
-    //     $response = Http::withBasicAuth($apiKey, '')
-    //         ->post('https://www.billplz-sandbox.com/api/v3/bills', [
-    //             'collection_id' => $collectionId,
-    //             'description' => $description,
-    //             'email' => $email,
-    //             'name' => $name,
-    //             'amount' => $amount,
-    //             'callback_url' => $callbackUrl
-    //         ]);
-
-    //     $billData = $response->json();
-
-    //     $callbackUrl = $billData['url'];
-
     //     $billData['id_pembayaran'] = $billData['id'];
     //     unset($billData['id']);
 
@@ -144,22 +118,6 @@ class BillplzController extends Controller
         return view('payment.create-bill');
     }
 
-    // public function createBarang(Request $request)
-    // {
-    //     $request->validate([
-    //         'nama_barang' => 'required',
-    //         'deskripsi_barang' => 'required',
-    //         'harga_barang' => 'required|numeric',
-    //     ]);
-
-    //     Barang::create([
-    //         'nama_barang' => $request->nama_barang,
-    //         'deskripsi_barang' => $request->deskripsi_barang,
-    //         'harga_barang' => $request->harga_barang,
-    //     ]);
-    //     return view('produk.index');
-    // }
-
 
     public function showBarang(Request $request)
     {
@@ -229,7 +187,7 @@ class BillplzController extends Controller
                     'description' => $barang->deskripsi_barang,
                     'email' => $request->input('email', 'sanks@gmail.com'),
                     'name' => $barang->nama_barang,
-                    'amount' => $barang->harga_barang * 100,
+                    'amount' => $barang->harga_barang,
                     'callback_url' => $request->input('callback_url', url('handleBillplzCallback')),
                 ]);
 

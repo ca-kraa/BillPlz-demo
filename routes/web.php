@@ -22,9 +22,6 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
-Route::get('/payment/create', [BillplzController::class, 'createForm'])->name('payment.createForm');
-Route::post('/payment/create', [BillplzController::class, 'createBill'])->name('payment.create');
-
 Route::post('/handleBillplzCallback', [BillplzController::class, 'handleBillplzCallback'])->name('handle-billplz-callback');
 Route::get('/create-bill/{barangId}', [BillplzController::class, 'createBill'])->name('create.bill');
 

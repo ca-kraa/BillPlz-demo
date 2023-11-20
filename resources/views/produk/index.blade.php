@@ -35,8 +35,9 @@
                         <td class="text-center align-middle">{{ $barang->deskripsi_barang }}</td>
                         <td class="text-center align-middle">{{ $barang->harga_barang }}</td>
                         <td class="text-center align-middle">
-                            <a href="#" onclick="showLoading(); openWindow(); return false;"
+                            <a href="#" onclick="showLoading(); openWindow({{ $barang->id }}); return false;"
                                 class="btn-bayar">Bayar</a>
+
                         </td>
                     </tr>
                 @endforeach
@@ -115,17 +116,17 @@
             document.getElementById('loadingPembayaran').classList.remove('hidden');
         }
 
-        function openWindow() {
-            var newWindow = window.open('{{ route('create.bill', ['barangId' => $barang->id]) }}', 'newwindow',
-                'width=425,height=600');
+        function openWindow(barangId) {
+            var newWindow = window.open('/create-bill/' + barangId, 'newwindow', 'width=425,height=600');
 
             if (newWindow) {
                 newWindow.onfocus = function() {
                     document.getElementById('loadingPembayaran').classList.add('hidden');
-                }
+                };
             }
         }
     </script>
+
 
 
 @endsection
