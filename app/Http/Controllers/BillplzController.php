@@ -298,4 +298,15 @@ class BillplzController extends Controller
 
         return redirect()->route('produk.store');
     }
+
+    public function ShowBill()
+    {
+        $payment = Payment::all();
+
+        if ($payment->isEmpty()) {
+            return response()->json(['Message' => 'No billing data available :(. Please add data first.╰（‵□′）╯']);
+        } else {
+            return response()->json(['Message' => 'Success Show Billing (〃￣︶￣)人(￣︶￣〃) ', 'Data' => $payment]);
+        }
+    }
 }
