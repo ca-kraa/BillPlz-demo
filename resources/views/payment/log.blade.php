@@ -12,8 +12,7 @@
             <button onclick="filterTable('paid')"
                 class="bg-green-500 text-white hover:bg-green-700 active:bg-green-800 py-1 px-2 rounded mr-2">Paid</button>
             <button onclick="filterTable('due')"
-                class="bg-red-500 text-white hover:bg-red-700 active:bg-red-800 py-1 px-2 rounded">Not
-                Paid</button>
+                class="bg-red-500 text-white hover:bg-red-700 active:bg-red-800 py-1 px-2 rounded">Unpaid</button>
 
         </div>
 
@@ -34,26 +33,23 @@
 
     <script>
         let allPayments = [];
-        let currentFilter = 'all'; // Keep track of the current filter
-
-        // Fetch data immediately after page load
+        let currentFilter = 'all';
         fetchData();
 
-        // Fetch data every 5 seconds
-        setInterval(fetchData, 5000);
+        setInterval(fetchData, 10000);
 
         function fetchData() {
             fetch('/api/showbill-log')
                 .then(response => response.json())
                 .then(data => {
                     allPayments = data.Data;
-                    filterTable(currentFilter); // Apply the current filter after fetching data
+                    filterTable(currentFilter);
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }
 
         function filterTable(state) {
-            currentFilter = state; // Update the current filter
+            currentFilter = state;
 
             if (state === 'all') {
                 displayPayments(allPayments);
@@ -70,16 +66,21 @@
             if (payments.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML =
-                    '<td colspan="5" class="text-center py-2 px-4 border-b text-center">No payments found. They may have already been paid or there may be none at this time. <br>ヾ(≧ ▽ ≦)ゝ</td>';
+                    '<td colspan="5" class="text-center py-2 px-4 border-b text-center">No payments found. <br>(ノへ￣、)</td>';
                 tableBody.appendChild(row);
             } else {
                 payments.forEach(payment => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                 <td class="py-2 px-4 border-b text-center">${payment.name}</td>
-                <td class="py-2 px-4 border-b text-center">${payment.description}</td>
                 <td class="py-2 px-4 border-b text-center">${payment.paid_amount}</td>
-                <td class="py-2 px-4 border-b text-center">${payment.state}</td>
+                <td class="py-2 px-4 border-b text-center">${payment.description}</td>
+                <td class="py-2 px-4 border-b text-center">
+                    <span class="${payment.state === 'paid' ? 'bg-green-500' : 'bg-yellow-400'} text-white py-1 px-2 rounded inline-flex items-center">
+                        <i class="${payment.state === 'paid' ? 'fas fa-check-circle' : 'fas fa-clock'} mr-1"></i>
+                        ${payment.state === 'paid' ? 'Paid' : 'Process'}
+                    </span>
+                </td>
                 <td class="py-2 px-4 border-b text-center">
                 <button onclick="openMiniWindow('${payment.url}')" class="bg-blue-500 text-white hover:bg-blue-700 py-1 px-2 rounded">
                     <i class="fa-solid fa-arrow-up-right-from-square ml-1"></i> Open
