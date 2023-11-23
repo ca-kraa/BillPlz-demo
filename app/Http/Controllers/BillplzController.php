@@ -36,16 +36,6 @@ class BillplzController extends Controller
         return response()->json($bill);
     }
 
-    //     $billData['id_pembayaran'] = $billData['id'];
-    //     unset($billData['id']);
-
-    //     Payment::create($billData);
-
-    //     $urlFromResponse = $billData['url'];
-
-    //     return redirect($urlFromResponse);
-    // }
-
     public function getPayment(Request $request)
     {
         $apiKey = env('BILLPLZ_API_KEY');
